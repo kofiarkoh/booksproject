@@ -12,7 +12,7 @@ from django.contrib.auth import  login
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
 from booksapp.serializers import UserSerializer, BookSerializer
-
+from booksapp.models import Book
 
 # Create your views here.
 
@@ -57,3 +57,8 @@ class BooksView(APIView):
             })
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self,request, format=None):
+        books = Book.objects.filter(user_id=request.user.id)
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data)
