@@ -1,4 +1,5 @@
 from random import randrange
+from datetime import datetime
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
@@ -10,9 +11,10 @@ from rest_framework import permissions
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import  login
+from django.utils import timezone
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
-from booksapp.serializers import UserSerializer, BookSerializer, RequestPasswordResetTokenSerializer
+from booksapp.serializers import UserSerializer, BookSerializer, RequestPasswordResetTokenSerializer, VerifyPasswordResetTokenSerializer
 from booksapp.models import Book, User, OTP
 
 # Create your views here.
@@ -84,3 +86,34 @@ class RequestPasswordResetOTPView(APIView):
             return Response({
                 'message' : 'No account exists with the provided email'
             }, status=status.HTTP_404_NOT_FOUND)
+
+
+class VerifyPasswordResetOTPView(APIView):
+
+    def post(self, request, format=None):
+        try:
+            data = JSONParser().parse(request)
+            serializer = VerifyPasswordResetTokenSerializer(data=data)
+
+            if serializer.is_valid():
+                otp = OTP.objects.get(code=serializer.validated_data['token'])
+                current_time = timezone.now()
+                diff_in_minutes = (current_time - otp.created_at)
+                diff_in_minutes = diff_in_minutes.total_seconds() / 60
+                if diff_in_minutes> 5:
+                    return Response({
+                        'message': 'OTP token expired',
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                otp.delete()
+                return Response(
+                    {
+                        'message': 'OTP verified successfully',
+                    }
+                )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except ObjectDoesNotExist:
+            return Response({
+                'message' : 'Invalid OTP'
+            }, status=status.HTTP_400_BAD_REQUEST)

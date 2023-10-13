@@ -20,3 +20,6 @@ class BookSerializer(serializers.ModelSerializer):
 
 class RequestPasswordResetTokenSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+class VerifyPasswordResetTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()
