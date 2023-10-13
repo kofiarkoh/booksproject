@@ -23,4 +23,10 @@ class Book(models.Model):
     author = models.CharField(max_length=150)
     description = models.CharField(max_length=200)
 
+class OTP(models.Model):
+    user = models.ForeignKey(User,related_name='otps',on_delete=models.CASCADE)
+    code = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 
