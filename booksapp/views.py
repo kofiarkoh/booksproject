@@ -1,3 +1,4 @@
+from random import randrange
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
@@ -12,7 +13,7 @@ from django.contrib.auth import  login
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
 from booksapp.serializers import UserSerializer, BookSerializer, RequestPasswordResetTokenSerializer
-from booksapp.models import Book, User
+from booksapp.models import Book, User, OTP
 
 # Create your views here.
 
@@ -73,6 +74,8 @@ class RequestPasswordResetOTPView(APIView):
             serializer = RequestPasswordResetTokenSerializer(data=data)
             if serializer.is_valid():
                 user = User.objects.get(email=serializer.validated_data['email'])
+                otp = OTP(user=user, code=f"{randrange(0000,9999)}")
+                otp.save()
                 return Response("send the token")
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
