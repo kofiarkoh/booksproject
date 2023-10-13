@@ -6,9 +6,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework import status
 from rest_framework import permissions
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import  login
 from knox.views import LoginView as KnoxLoginView
+from knox.auth import TokenAuthentication
 from booksapp.serializers import UserSerializer
 
 
@@ -38,3 +40,11 @@ class LoginView(KnoxLoginView):
         user = serializer.validated_data['user']
         login(request, user)
         return super(LoginView, self).post(request, format=None)
+
+
+class BooksView(APIView):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self,request,format=None):
+        return Response("will create a book")
