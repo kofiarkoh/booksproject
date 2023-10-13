@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import  login
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
-from booksapp.serializers import UserSerializer
+from booksapp.serializers import UserSerializer, BookSerializer
 
 
 # Create your views here.
@@ -46,5 +46,14 @@ class BooksView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    def post(self,request,format=None):
-        return Response("will create a book")
+    def post(self, request, format=None):
+        data = JSONParser().parse(request)
+        serializer = BookSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response({
+                'message' : 'book data store successfully',
+                'data' : serializer.data
+            })
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
