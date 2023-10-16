@@ -17,7 +17,7 @@ from knox.auth import TokenAuthentication
 from mail_templated import EmailMessage
 from booksapp.serializers import UserSerializer, BookSerializer, RequestPasswordResetTokenSerializer, VerifyPasswordResetTokenSerializer
 from booksapp.models import Book, User, OTP
-
+from booksapp.tasks import send_password_reset_otp
 # Create your views here.
 
 class CreateUser(APIView):
@@ -79,11 +79,13 @@ class RequestPasswordResetOTPView(APIView):
                 user = User.objects.get(email=serializer.validated_data['email'])
                 otp = OTP(user=user, code=f"{randrange(0000,9999)}")
                 otp.save()
-                message = EmailMessage('mail/password_reset_otp.html',
-                                       {},from_email='t@gmail.com',to=['u@gmail.com']
-                                       )
-                message.content_subtype
-                message.send()
+
+                #message = EmailMessage('mail/password_reset_otp.html',
+                #                       {},from_email='t@gmail.com',to=['u@gmail.com']
+                #                       )
+                #message.content_subtype
+                #message.send()
+                send_password_reset_otp.delay()
                 return Response("send the token")
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
