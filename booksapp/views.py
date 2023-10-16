@@ -1,3 +1,4 @@
+import logging
 from random import randrange
 from datetime import datetime
 from django.shortcuts import render
@@ -18,6 +19,9 @@ from mail_templated import EmailMessage
 from booksapp.serializers import UserSerializer, BookSerializer, RequestPasswordResetTokenSerializer, VerifyPasswordResetTokenSerializer
 from booksapp.models import Book, User, OTP
 from booksapp.tasks import send_password_reset_otp
+
+from knox.models import AuthToken
+# import logg
 # Create your views here.
 
 class CreateUser(APIView):
@@ -39,12 +43,15 @@ class LoginView(KnoxLoginView):
     def post(self, request, format=None):
 
         serializer = AuthTokenSerializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request, user)
-        return super(LoginView, self).post(request, format=None)
 
+        user = serializer.validated_data['user']
+        _ , token = AuthToken.objects.create(user)
+
+        return Response({
+            'user'  : UserSerializer(user).data,
+            'token' : token
+        })
 
 class BooksView(APIView):
     authentication_classes = (TokenAuthentication,)
