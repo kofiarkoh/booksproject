@@ -20,8 +20,8 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/login/', LoginView.as_view()),
-    path('api/auth/register/', CreateUser.as_view()),
+    path('api/auth/login/', LoginView.as_view(), name='login'),
+    path('api/auth/register/', CreateUser.as_view(),name='register'),
     path('api/auth/password-reset/send-otp/', RequestPasswordResetOTPView.as_view()),
     path('api/auth/password-reset/verify-otp/', VerifyPasswordResetOTPView.as_view()),
     path('api/books/', BooksView.as_view())
