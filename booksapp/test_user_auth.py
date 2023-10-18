@@ -39,3 +39,6 @@ class TestUserSignUp(APITestCase):
         response = self.client.post(url, data, format='json')
         response_data = json.loads(response.content)
         self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEquals(user.first_name, response_data['user']['first_name'])
+        self.assertEquals(user.last_name, response_data['user']['last_name'])
+
